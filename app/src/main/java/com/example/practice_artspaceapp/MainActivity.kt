@@ -22,6 +22,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -47,50 +51,89 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+data class SpaceArtImage(
+    val image: Int,
+    val description: String,
+    val artist: String,
+    val year: Int)
+
+val images = listOf(
+    SpaceArtImage(
+        R.drawable.forest,
+        "Forest",
+        "Mario",
+        1994),
+    SpaceArtImage(
+        R.drawable.bakery,
+        "Bakery",
+        "Luca",
+        1633),
+    SpaceArtImage(
+        R.drawable.sawmill,
+        "Sawmill",
+        "Alexialita",
+        2000),
+    SpaceArtImage(
+        R.drawable.windmill,
+        "Windmill",
+        "Panda",
+        1993)
+)
+
 
 @Composable
 fun ArtSpaceApp(modifier: Modifier = Modifier){
-        Column(modifier = modifier,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center){
-            ArtSpaceImage()
-            Spacer(modifier = Modifier.height(128.dp))
-            ImageInfo(
-                Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .background(Color.LightGray)
-                    .widthIn(64.dp, 320.dp)
-            )
+    var imageId by remember { mutableIntStateOf(0) }
+    val selectedImage = images[imageId]
 
-            Spacer(modifier = Modifier.height(63.dp))
-            NavigationButtons(previousOnClick =  {}, nextOnClick =  {})
-        }
+    Column(modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center){
+        ArtSpaceImage(image = selectedImage.image, description = selectedImage.description)
+        Spacer(modifier = Modifier.height(128.dp))
+        ImageInfo(
+            Modifier
+                .align(Alignment.CenterHorizontally)
+                .background(Color.LightGray)
+                .widthIn(64.dp, 320.dp),
+            selectedImage
+        )
+
+        Spacer(modifier = Modifier.height(63.dp))
+        NavigationButtons(previousOnClick =  {
+            imageId--
+            if(imageId < 0) imageId = images.lastIndex
+        }, nextOnClick =  {
+            imageId++
+            if(imageId > images.lastIndex) imageId = 0
+        })
+    }
 }
 
 @Composable
-fun ArtSpaceImage(modifier: Modifier = Modifier){
+fun ArtSpaceImage(modifier: Modifier = Modifier, image: Int, description: String){
     Box(modifier = modifier
         .background(Color.White)
         .wrapContentSize(Alignment.Center)
         .padding(20.dp)
     ){
         Image(
-            painter = painterResource(R.drawable.forest),
-            contentDescription = null,
+            painter = painterResource(image),
+            contentDescription = description,
             modifier = Modifier.size(256.dp)
         )
     }
 }
 
 @Composable
-fun ImageInfo(modifier: Modifier = Modifier){
+fun ImageInfo(modifier: Modifier = Modifier, imageInfo: SpaceArtImage){
     Column(modifier = modifier.padding(20.dp)){
         Text(
-            text = "Arbolitos arbolitos arbolitos",
+            text = imageInfo.description,
             textAlign = TextAlign.Left,
         )
         Text(
-            text = "Artist",
+            text = imageInfo.artist + " (${imageInfo.year})",
             textAlign = TextAlign.Left,
         )
     }
